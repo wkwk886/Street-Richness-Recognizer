@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Show and hide layers</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        #menu {
+            background: #fff;
+            position: absolute;
+            z-index: 1;
+            top: 10px;
+            right: 10px;
+            border-radius: 3px;
+            width: 120px;
+            border: 1px solid rgba(0, 0, 0, 0.4);
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        #menu a {
+            font-size: 13px;
+            color: #404040;
+            display: block;
+            margin: 0;
+            padding: 10px;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        #menu a:last-child {
+            border: none;
+        }
+
+        #menu a:hover {
+            background-color: #f8f8f8;
+            color: #404040;
+        }
+
+        #menu a.active {
+            background-color: #3887be;
+            color: #ffffff;
+        }
+
+        #menu a.active:hover {
+            background: #3074a4;
+        }
+
+        /*弹出图片样式*/
+        .mapboxgl-popup-content {
+        background: rgba(0, 57, 77, 0.7);
+        border: 1px solid #0d6e91;
+        border-radius: 0;
+        max-width: 300px; /* 设置最大宽度 */
+        max-height: 300px; /* 设置最大高度 */
+        overflow: auto; /* 添加滚动条，如果内容超出大小 */
+    }
+
+    .mapboxgl-popup-content img {
+        max-width: 100%; /* 设置图片最大宽度为容器宽度的百分比 */
+        height: auto; /* 让高度自适应保持比例 */
+    }
+
+        .mapboxgl-popup-tip {
+            border-top-color: rgba(0, 57, 77, 0.75) !important;
+        }
+
+        .mapboxgl-popup-close-button {
+            font-size: large;
+            font-style: unset;
+            color: white;
+            padding: 0px 6px;
+            font-weight: 300;
+        }
+
+        .mapboxgl-ctrl.mapboxgl-ctrl-attrib { background: none; }
+        /*设置地图页面的样式和 Mapbox 弹出窗口的外观。
+    </style>
+</head>
+
+<body>
+    <nav id="menu"></nav>
+    <div id="map"></div>
+
+    <script>
+        //token url
+        mapboxgl.accessToken = 'pk.eyJ1IjoidG95NTY3IiwiYSI6ImNsb2diOGUyNDB0cGYya3JybnoxaGc4Y3gifQ.POV6rGRYZfEWyziRib3Uiw';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            minZoom: 5,
+            maxZoom: 17,
+            style: 'mapbox://styles/toy567/clpxxga1700je01pxfdsrg8h1',
+        });
+
+        //按钮切换图层
+        map.on('idle', () => {
+            const toggleableLayerIds = ['1', '3', '5', '6', '7', '8', '9', '11', '12', '14', 'Images-color'];
+
+            for (const id of toggleableLayerIds) {
+                if (!document.getElementById(id)) {
+                    const link = document.createElement('a');
+                    link.id = id;
+                    link.href = '#';
+                    link.textContent = id;
+                    link.className = 'active';
+
+                    link.onclick = function (e) {
+                        const clickedLayer = this.textContent;
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+
+                        if (visibility === 'visible') {
+                            map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+                            this.className = '';
+                        } else {
+                            this.className = 'active';
+                            map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+                        }
+                    };
+
+                    const layers = document.getElementById('menu');
+                    layers.appendChild(link);
+                }
+            }
+        });
+
+        //弹出图片
+        map.on('click', function(e) {   // Event listener to do some code when user clicks on the map
+
+      var images = map.queryRenderedFeatures(e.point, {
+        layers: ['Images']    // replace this with the name of the layer from the Mapbox Studio layers panel
+        });
+
+      if (images.length == 0) {
+        return;
+      }
+
+        var popup = new mapboxgl.Popup({
+            closeButton: true, // If true, a close button will appear in the top right corner of the popup. Default = true
+            closeOnClick: true, // If true, the popup will automatically close if the user clicks anywhere on the map. Default = true
+            anchor: 'bottom',
+            offset: [0, -15]
+        });
+
+          popup.setLngLat(images[0].geometry.coordinates);
+
+          // Set the contents of the popup window
+          popup.setHTML("<p>Date: " + images[0].properties.date +"</p>"+"<img src='"+images[0].properties.url+"'>");
+
+          popup.addTo(map);
+      });
+
+    </script>
+</body>
+
+</html>
